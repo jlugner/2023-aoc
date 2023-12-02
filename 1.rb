@@ -22,7 +22,7 @@ mapping = {
 }
 
 # Ugly hack of making sure overlapping chars are not removed, ie, 'oneight' is replaced with '18', not '1ight'
-regular_match = mapping.keys.join('|')
+regular_match = Regexp.union(mapping.keys)
 reverse_match = Regexp.union(mapping.keys.map(&:reverse))
 
 sum = input.sum do |line|
