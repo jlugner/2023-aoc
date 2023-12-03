@@ -10,15 +10,25 @@ module Solutions
       numbers = []
       matrice = input.map(&:chars)
       input.each_with_index do |line, y|
-        line.enum_for(:scan, /(\d+)/).map do
-          number = Regexp.last_match[0]
-          x = Regexp.last_match.begin(0)
-
+        each_digit(line) do |number, x|
           numbers << number.to_i if adjacent_to_match?(matrice, x, y, number.length, /[^0-9.]/)
         end
       end
 
       numbers.sum
+    end
+
+    def part2(input)
+      gears = Hash.new { |h, k| h[k] = [] }
+      matrice = input.map(&:chars)
+      input.each_with_index do |line, y|
+        each_digit(line) do |number, x|
+          match_position = adjacent_to_match?(matrice, x, y, number.length, /\*/)
+          gears[match_position] << number.to_i if match_position
+        end
+      end
+
+      gears.values.filter { |matches| matches.length == 2 }.sum { _1.reduce(:*) }
     end
 
     def adjacent_to_match?(matrice, x, y, length, pattern)
@@ -43,20 +53,15 @@ module Solutions
       [x_start, x_stop, y_start, y_stop]
     end
 
-    def part2(input)
-      gears = Hash.new { |h, k| h[k] = [] }
-      matrice = input.map(&:chars)
-      input.each_with_index do |line, y|
-        line.enum_for(:scan, /(\d+)/).map do
-          number = Regexp.last_match[0]
-          x = Regexp.last_match.begin(0)
+    def each_digit(line)
+      line.enum_for(:scan, /(\d+)/).map do
+        number = Regexp.last_match[0]
+        x = Regexp.last_match.begin(0)
 
-          match_position = adjacent_to_match?(matrice, x, y, number.length, /\*/)
-          gears[match_position] << number.to_i if match_position
-        end
+        yield number, x
       end
-
-      gears.values.filter { |matches| matches.length == 2 }.sum { _1.reduce(:*) }
     end
+
+    private_instance_methods %i[adjacent_to_match? search_space each_digit]
   end
 end
