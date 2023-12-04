@@ -12,7 +12,7 @@ module Solutions
     end
 
     def part1(input)
-      input.sum { |wins| wins.positive? ? 1 * (2**(wins - 1)) : 0 }
+      input.sum { |wins| wins.positive? ? 2**(wins - 1) : 0 }
     end
 
     def part2(input)
