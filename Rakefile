@@ -30,14 +30,14 @@ def solution_body(day_number)
   BODY
 end
 
-def test_body(_day_number)
+def test_body(day_number)
   <<~BODY
     # frozen_string_literal: true
 
-    require_relative '../../solutions/day4/solution'
+    require_relative '../../solutions/day#{day_number}/solution'
 
     module Solutions
-      class TestDay4 < Minitest::Test
+      class TestDay#{day_number} < Minitest::Test
         def setup
           @solver = Solutions::Day4
         end
