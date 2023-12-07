@@ -23,8 +23,7 @@ module Solutions
                   in [3, _, _]    then 4
                   in [2, 2, _]    then 3
                   in [2, _, _, _] then 2
-                  else
-                    1
+                  else                 1
                   end
 
       def occurrences_sorted
