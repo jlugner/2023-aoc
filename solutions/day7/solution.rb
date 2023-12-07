@@ -2,8 +2,6 @@
 
 module Solutions
   module Day7
-    module_function
-
     CARD_STRENGTH_ORDER = '_23456789TJQKA'
 
     Hand = Struct.new(:hand, :bid, keyword_init: true) do
@@ -44,6 +42,8 @@ module Solutions
         self
       end
     end
+
+    module_function
 
     def parse(input)
       input.lines.map do |line|
