@@ -39,7 +39,7 @@ def test_body(day_number)
     module Solutions
       class TestDay#{day_number} < Minitest::Test
         def setup
-          @solver = Solutions::Day4
+          @solver = Solutions::Day#{day_number}
         end
 
         def test_parse; end
