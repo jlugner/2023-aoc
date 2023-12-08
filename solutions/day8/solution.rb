@@ -36,7 +36,7 @@ module Solutions
         end
       end
 
-      path_lengths.reduce(1, :lcm)
+      path_lengths.reduce(&:lcm)
     end
   end
 end
