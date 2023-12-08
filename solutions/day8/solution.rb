@@ -18,26 +18,22 @@ module Solutions
     def part1(input)
       move_rules = input.directions.chars.cycle
       position = 'AAA'
-      count = 0
-      until position == 'ZZZ'
-        direction = move_rules.next
+
+      move_rules.each_with_index do |direction, count|
         position = input.transitions[position][direction]
-        count += 1
+        return count + 1 if position == 'ZZZ'
       end
-      count
     end
 
     def part2(input)
       positions = input.transitions.keys.filter { _1.end_with?('A') }
-      path_lengths = positions.map do |position|
+      path_lengths = positions.map do |start_position|
         move_rules = input.directions.chars.cycle
-        count = 0
-        until position.end_with?('Z')
-          direction = move_rules.next
-          position = input.transitions[position][direction]
-          count += 1
+
+        move_rules.each_with_index do |direction, count|
+          start_position = input.transitions[start_position][direction]
+          break count + 1 if start_position.end_with?('Z')
         end
-        count
       end
 
       path_lengths.reduce(1, :lcm)
