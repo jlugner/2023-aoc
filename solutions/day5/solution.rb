@@ -1,69 +1,68 @@
 # frozen_string_literal: true
 
+class Range
+  def intersection(other)
+    return nil if (self.begin > other.end) || (other.begin > self.end)
+
+    [self.begin, other.begin].max..[self.end, other.end].min
+  end
+
+  alias & intersection
+end
+
 module Solutions
   module Day5
     module_function
 
-    ConvertionTable = Struct.new(:from, :to, :mapping)
+    ConvertionStep = Data.define(:rules)
+    ConvertionRule = Struct.new(:range, :offset)
+    Almanac = Data.define(:seeds, :convertion_steps)
     def parse(input)
       instructions = input.split("\n\n")
       seeds = instructions[0].scan(/(\d+)/).flatten.map(&:to_i)
-      maps = {}
-      instructions[1..].map do |convertion_ruleset|
-        categories, *ranges = convertion_ruleset.split("\n")
-        matches = categories.match(/(?<from>.*)-to-(?<to>.*) map:/)
-        from = matches[:from]
-        to = matches[:to]
-        maps[from] = ConvertionTable.new(from, to, {})
-        ranges.each do |range|
-          range = range.scan(/(\d+)/).flatten.map(&:to_i)
-          destination, source, length = range
-          maps[from].mapping.merge!(source..(source + length) => destination - source)
+      convertion_steps = instructions[1..].map do |convertion_ruleset|
+        _categories, *ranges = convertion_ruleset.split("\n")
+        rules = ranges.map do |range|
+          destination, source, length = range.scan(/(\d+)/).flatten.map(&:to_i)
+          ConvertionRule.new(source..(source + length), destination - source)
         end
+        ConvertionStep.new(rules:)
       end
-      [seeds, maps]
+      Almanac.new(seeds:, convertion_steps:)
     end
 
-    # Walk through maps and convert the seed number until we reach a location - our final convertion
-    def convert(seed_number, maps)
-      convert_from = 'seed'
-      until convert_from == 'location'
-        mappings = maps[convert_from].mapping
-        offset = mappings.find { |range, _v| range.include?(seed_number) }&.last
-        offset ||= 0
-        seed_number += offset
-        convert_from = maps[convert_from].to
+    def part1(input) = input.seeds.map do |seed|
+      input.convertion_steps.reduce(seed) do |destination, convertion_step|
+        colliding_rule = convertion_step.rules.find { |rule| rule.range.cover?(destination) }
+        colliding_rule ? destination + colliding_rule.offset : destination
       end
-
-      seed_number
-    end
-
-    def part1(input)
-      seeds, maps = input
-      locations = seeds.map { convert(_1, maps) }
-      locations.min
-    end
+    end.min
 
     def part2(input)
-      seed_ranges, maps = input
-      final_ranges = []
-      seed_ranges.each_slice(2)
-                 .map { |start, length| start..(start + length) }
-                 .sort_by { _1[0] }
-                 .each do |range|
-        overlapping_range = final_ranges.find { |other| other.cover?(range.start) || other.cover?(range.last) }
-        unless overlapping_range
-          final_ranges << range
-          next
-        end
+      seed_ranges = input.seeds
+                         .each_slice(2)
+                         .map { |start, length| start..(start + length) }
+                         .sort { _1.begin <=> _2.begin }
 
-        final_ranges -= [overlapping_range]
-        final_ranges << [overlapping_range.first, range.first].min..[overlapping_range.last, range.last].max
+      location_ranges = input.convertion_steps.reduce(seed_ranges) do |ranges, convertion_step|
+        ranges.map do |range|
+          convertion_step.rules.map do |rule|
+            intersection = range & rule.range
+            if intersection
+              # part before intersection - unaltered, intersection - offset, part after intersection - unaltered
+              new_ranges = []
+              new_ranges << (range.begin..(intersection.begin - 1)) if range.begin < intersection.begin
+              new_ranges << ((intersection.begin + rule.offset)..(intersection.end + rule.offset))
+              new_ranges << ((intersection.end + 1)..range.end) if intersection.end < range.end
+              new_ranges
+            else
+              range
+            end
+          end
+        end
       end
 
-      seeds = final_ranges.flat_map(&:to_a)
-      locations = seeds.map { convert(_1, maps) }
-      locations.min
+      location_ranges.map(&:begin).min
     end
   end
 end
