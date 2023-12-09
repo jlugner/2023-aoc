@@ -23,14 +23,7 @@ module Solutions
     end
 
     def extrapolate_next_value(value_history)
-      value_history = build_change_history(value_history)
-      ((value_history.length - 1)..0).step(-1).each do |i|
-        change_serie = value_history[i]
-        diff = value_history[i + 1]&.last || 0
-        change_serie << change_serie.last + diff
-      end
-
-      value_history.first.last
+      build_change_history(value_history).sum(&:last)
     end
   end
 end
