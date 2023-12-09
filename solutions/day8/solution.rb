@@ -27,12 +27,12 @@ module Solutions
 
     def part2(input)
       positions = input.transitions.keys.filter { _1.end_with?('A') }
-      path_lengths = positions.map do |start_position|
+      path_lengths = positions.map do |position|
         move_rules = input.directions.chars.cycle
 
         move_rules.each_with_index do |direction, count|
-          start_position = input.transitions[start_position][direction]
-          break count + 1 if start_position.end_with?('Z')
+          position = input.transitions[position][direction]
+          break count + 1 if position.end_with?('Z')
         end
       end
 
